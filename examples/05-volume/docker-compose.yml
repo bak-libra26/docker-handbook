@@ -1,0 +1,22 @@
+# 볼륨 비교: named volume vs bind mount
+services:
+  db:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+    volumes:
+      # Named Volume — Docker가 관리, 데이터 영속성 보장
+      - db-data:/var/lib/mysql
+
+  app:
+    image: nginx:alpine
+    volumes:
+      # Bind Mount — 호스트 경로를 직접 마운트 (개발 시 유용)
+      - ./html:/usr/share/nginx/html:ro   # :ro = 읽기 전용
+    ports:
+      - "8080:80"
+
+# Named Volume 선언 — 컨테이너 삭제해도 데이터 유지
+volumes:
+  db-data:
+    driver: local

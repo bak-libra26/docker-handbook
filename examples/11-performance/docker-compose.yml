@@ -1,0 +1,28 @@
+# 컨테이너 리소스 제한 — 메모리/CPU 상한을 설정하여 호스트 보호
+services:
+  api:
+    image: myapp:latest
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:       # 최소 보장 리소스
+          cpus: "0.25"
+          memory: 128M
+    # [함정] deploy.resources는 docker compose up에서도 동작하지만
+    # Swarm 모드가 아니면 reservations는 무시될 수 있다
+
+  java-app:
+    image: my-java-app:latest
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+    environment:
+      # JVM 컨테이너 인식 — Java 11+는 기본 활성화, 8u191+는 플래그 필요
+      # [함정] MaxRAMPercentage 없이 -Xmx만 쓰면 컨테이너 limit과 불일치 위험
+      JAVA_OPTS: >-
+        -XX:MaxRAMPercentage=75.0
+        -XX:InitialRAMPercentage=50.0
+        -XX:+UseContainerSupport

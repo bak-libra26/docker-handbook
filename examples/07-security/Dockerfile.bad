@@ -1,0 +1,4 @@
+# ❌ root로 실행 → 컨테이너 탈출 시 호스트 root 획득
+FROM eclipse-temurin:21-jre
+COPY app.jar app.jar
+ENTRYPOINT ["java", "-jar", "app.jar"]

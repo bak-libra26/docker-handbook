@@ -1,0 +1,11 @@
+# ✅ 좋은 예: 빌드는 JDK, 실행은 JRE만 (~200MB)
+FROM eclipse-temurin:21-jdk AS builder
+WORKDIR /app
+COPY . .
+RUN ./gradlew build -x test
+
+FROM eclipse-temurin:21-jre-alpine
+WORKDIR /app
+COPY --from=builder /app/build/libs/app.jar app.jar
+USER 1000:1000
+ENTRYPOINT ["java", "-jar", "app.jar"]

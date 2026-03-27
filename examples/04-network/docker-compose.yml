@@ -1,0 +1,27 @@
+# 네트워크 모드 비교: bridge(기본) vs host
+services:
+  # bridge 모드 — 격리된 네트워크, 포트 매핑 필요
+  app-bridge:
+    image: nginx:alpine
+    ports:
+      - "8081:80"            # 호스트:컨테이너 포트 매핑
+    networks:
+      - app-net              # 사용자 정의 브릿지 네트워크
+
+  # 같은 브릿지 네트워크 내에서는 서비스명으로 통신 가능
+  app-client:
+    image: curlimages/curl
+    command: ["curl", "http://app-bridge:80"]  # 서비스명 = DNS
+    depends_on:
+      - app-bridge
+    networks:
+      - app-net
+
+  # host 모드 — 호스트 네트워크 직접 사용 (포트 매핑 불필요, Linux만)
+  app-host:
+    image: nginx:alpine
+    network_mode: host       # 호스트의 80번 포트를 직접 사용
+
+networks:
+  app-net:
+    driver: bridge           # 기본값, 명시적으로 선언

@@ -1,0 +1,23 @@
+# Docker Secrets — 민감 정보를 환경변수 대신 파일 기반으로 안전하게 전달
+# [함정] 환경변수(environment)로 비밀번호를 넣으면 docker inspect에 그대로 노출된다
+services:
+  db:
+    image: postgres:16
+    secrets:
+      - db_password
+    environment:
+      # 파일 기반 시크릿 참조 — Postgres 공식 이미지가 _FILE 접미사를 지원
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+  app:
+    image: myapp:latest
+    secrets:
+      - db_password
+      - api_key
+    # [함정] 시크릿은 /run/secrets/<이름> 경로에 마운트된다
+    # 앱 코드에서 환경변수가 아닌 파일 읽기로 접근해야 한다
+
+secrets:
+  db_password:
+    file: ./secrets/db_password.txt   # Git에 절대 커밋하지 말 것 (.gitignore 필수)
+  api_key:
+    file: ./secrets/api_key.txt
